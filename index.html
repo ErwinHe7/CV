@@ -1,432 +1,973 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erwin He | Creative Developer & Data Analyst</title>
-    
+    <title>Erwin He | Full Stack Engineer & Data Analyst</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
                         sans: ['Space Grotesk', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
                     },
                     colors: {
                         bg: '#050505',
                         primary: '#F0F0F0',
-                        accent: '#CCFF00', // Acid Green
-                        glass: 'rgba(255, 255, 255, 0.03)',
-                        glassBorder: 'rgba(255, 255, 255, 0.08)',
+                        accent: '#CCFF00',
                     },
-                    cursor: {
-                        none: 'none',
-                    }
                 }
             }
         }
     </script>
 
     <style>
+        /* ======================== BASE ======================== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
         body {
             background-color: #050505;
             color: #F0F0F0;
             overflow-x: hidden;
-            cursor: none; /* Hide default cursor */
+            cursor: none;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
-        /* Noise Texture */
-        .noise-overlay {
+        /* ======================== PRELOADER ======================== */
+        #preloader {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+            inset: 0;
+            background: #050505;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            transition: opacity 0.9s ease, visibility 0.9s ease;
+        }
+        #preloader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+        .preloader-logo {
+            font-size: 4rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            color: #CCFF00;
+            opacity: 0;
+            animation: fadeInLogo 0.6s ease 0.2s forwards;
+        }
+        @keyframes fadeInLogo { to { opacity: 1; } }
+        .preloader-track {
+            width: 200px;
+            height: 1px;
+            background: rgba(255,255,255,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .preloader-fill {
+            position: absolute;
+            top: 0; left: 0;
             height: 100%;
-            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc0MDAnIGhlaWdodD0nNDAwJz48ZmlsdGVyIGlkPSdub2lzZSc+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuODUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+');
-            pointer-events: none;
-            z-index: 999;
-            opacity: 0.4;
+            background: #CCFF00;
+            width: 0%;
+            box-shadow: 0 0 8px #CCFF00;
+            transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .preloader-pct {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 0.1em;
         }
 
-        /* Custom Cursor */
-        .cursor-dot,
-        .cursor-outline {
+        /* ======================== SCROLL PROGRESS ======================== */
+        #scroll-progress {
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
+            height: 2px;
+            background: #CCFF00;
+            box-shadow: 0 0 8px #CCFF00, 0 0 20px rgba(204,255,0,0.3);
+            z-index: 9999;
+            transition: width 0.05s linear;
+        }
+
+        /* ======================== CURSOR ======================== */
+        .cursor-dot, .cursor-outline {
+            position: fixed;
+            top: 0; left: 0;
             transform: translate(-50%, -50%);
             border-radius: 50%;
-            z-index: 9999;
+            z-index: 9998;
             pointer-events: none;
         }
         .cursor-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #CCFF00;
-        }
-        .cursor-outline {
-            width: 40px;
-            height: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            transition: width 0.2s, height 0.2s, background-color 0.2s;
-            mix-blend-mode: difference;
-        }
-        
-        /* Utility */
-        .text-outline {
-            -webkit-text-stroke: 1px rgba(240, 240, 240, 0.2);
-            color: transparent;
-        }
-        
-        /* Hide scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #050505;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
+            width: 6px; height: 6px;
             background: #CCFF00;
         }
+        .cursor-outline {
+            width: 36px; height: 36px;
+            border: 1px solid rgba(255,255,255,0.35);
+            mix-blend-mode: difference;
+            transition: width 0.25s, height 0.25s, border-color 0.25s, background 0.25s;
+        }
+        .cursor-outline.big {
+            width: 56px; height: 56px;
+            border-color: rgba(204,255,0,0.5);
+            background: rgba(204,255,0,0.04);
+        }
+
+        /* ======================== NOISE ======================== */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 998;
+            opacity: 0.5;
+        }
+
+        /* ======================== NAV ======================== */
+        nav {
+            transition: backdrop-filter 0.4s ease, background 0.4s ease, border-color 0.4s ease;
+            border-bottom: 1px solid transparent;
+        }
+        nav.scrolled {
+            backdrop-filter: blur(20px);
+            background: rgba(5,5,5,0.75);
+            border-bottom-color: rgba(255,255,255,0.05);
+        }
+        .nav-link {
+            font-size: 0.68rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(240,240,240,0.4);
+            transition: color 0.3s;
+            position: relative;
+            padding-bottom: 2px;
+            background: none;
+            border: none;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 0;
+            width: 0; height: 1px;
+            background: #CCFF00;
+            transition: width 0.3s ease;
+        }
+        .nav-link.active { color: #F0F0F0; }
+        .nav-link:hover  { color: #F0F0F0; cursor: none; }
+        .nav-link.active::after, .nav-link:hover::after { width: 100%; }
+
+        /* ======================== HERO ======================== */
+        #hero-canvas {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            opacity: 0.35;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .line-wrap { overflow: hidden; }
+        .hero-line  { display: block; }
+
+        /* Glitch effect on name hover */
+        .glitch { position: relative; }
+        .glitch:hover::before, .glitch:hover::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            pointer-events: none;
+        }
+        .glitch:hover::before {
+            color: #CCFF00;
+            clip-path: polygon(0 15%, 100% 15%, 100% 40%, 0 40%);
+            animation: g1 0.25s steps(2) infinite;
+        }
+        .glitch:hover::after {
+            color: #fff;
+            clip-path: polygon(0 62%, 100% 62%, 100% 85%, 0 85%);
+            animation: g2 0.3s steps(3) infinite;
+        }
+        @keyframes g1 {
+            0%   { transform: translate(-3px, 0); }
+            100% { transform: translate( 3px, 0); }
+        }
+        @keyframes g2 {
+            0%   { transform: translate( 2px, 0); }
+            100% { transform: translate(-2px, 0); }
+        }
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(240,240,240,0.18);
+            color: transparent;
+        }
+
+        /* Typing cursor */
+        .type-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: #CCFF00;
+            margin-left: 3px;
+            vertical-align: middle;
+            animation: blink 0.75s infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        /* ======================== STATS STRIP ======================== */
+        .stat-item + .stat-item {
+            border-left: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* ======================== PROJECT CARDS ======================== */
+        .project-card {
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.015);
+            overflow: hidden;
+            transition: border-color 0.4s, transform 0.4s, background 0.4s;
+        }
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #CCFF00, transparent);
+            transform: scaleX(0);
+            transition: transform 0.5s ease;
+        }
+        .project-card:hover {
+            border-color: rgba(204,255,0,0.2);
+            transform: translateY(-6px);
+            background: rgba(204,255,0,0.02);
+        }
+        .project-card:hover::before { transform: scaleX(1); }
+        .project-metric {
+            font-family: 'Space Mono', monospace;
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #CCFF00;
+        }
+
+        /* ======================== EXPERIENCE TIMELINE ======================== */
+        .experience-row {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: border-color 0.3s;
+        }
+        .experience-row:hover { border-bottom-color: rgba(204,255,0,0.15); }
+        .timeline-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: #050505;
+            flex-shrink: 0;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .experience-row:hover .timeline-dot {
+            border-color: #CCFF00;
+            box-shadow: 0 0 10px rgba(204,255,0,0.4);
+        }
+
+        /* ======================== SKILL BARS ======================== */
+        .skill-track {
+            height: 2px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .skill-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #CCFF00, rgba(204,255,0,0.3));
+            border-radius: 2px;
+            width: 0;
+            transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        /* ======================== MARQUEE ======================== */
+        .marquee-outer { overflow: hidden; }
+        .marquee-inner {
+            display: flex;
+            gap: 2rem;
+            width: max-content;
+            animation: marquee 30s linear infinite;
+        }
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+
+        /* ======================== SCROLLBAR ======================== */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #1c1c1c; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #CCFF00; }
+
+        /* Scroll reveal initial state */
+        .reveal { opacity: 0; transform: translateY(36px); }
     </style>
 </head>
 <body>
 
-    <div id="app">
-        
-        <div class="noise-overlay"></div>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="preloader-logo">EH.</div>
+        <div class="preloader-track">
+            <div class="preloader-fill" id="preloader-fill"></div>
+        </div>
+        <div class="preloader-pct" id="preloader-pct">0%</div>
+    </div>
 
-        <div class="cursor-dot" ref="cursorDot"></div>
+    <!-- Scroll progress bar -->
+    <div id="scroll-progress"></div>
+
+    <div id="app">
+
+        <div class="noise-overlay"></div>
+        <div class="cursor-dot"     ref="cursorDot"></div>
         <div class="cursor-outline" ref="cursorOutline"></div>
 
-        <nav class="fixed top-0 w-full p-8 flex justify-between items-center z-50 mix-blend-difference">
-            <div class="text-xl font-bold tracking-tighter">EH.</div>
-            <a :href="'mailto:' + profile.contact.email" class="hover-magnet text-sm font-light tracking-widest hover:text-accent transition-colors">AVAILABLE FOR HIRE</a>
+        <!-- ===================== NAVIGATION ===================== -->
+        <nav class="fixed top-0 w-full px-6 md:px-10 py-5 flex justify-between items-center z-50" ref="navEl">
+            <div class="text-xl font-bold tracking-tighter select-none" style="cursor:none" @click="goTo('hero')">EH.</div>
+
+            <div class="hidden md:flex items-center gap-8">
+                <button class="nav-link" :class="{ active: active === 'about' }"      @click="goTo('about')">About</button>
+                <button class="nav-link" :class="{ active: active === 'experience' }" @click="goTo('experience')">Experience</button>
+                <button class="nav-link" :class="{ active: active === 'skills' }"     @click="goTo('skills')">Skills</button>
+                <button class="nav-link" :class="{ active: active === 'contact' }"    @click="goTo('contact')">Contact</button>
+            </div>
+
+            <a :href="'mailto:' + profile.contact.email"
+               class="hover-magnet text-xs tracking-widest border border-accent/30 text-accent px-4 py-2 hover:bg-accent hover:text-black transition-all duration-300">
+                HIRE ME
+            </a>
         </nav>
 
-        <section class="min-h-screen flex flex-col justify-center px-6 md:px-20 relative overflow-hidden">
-            <div class="absolute top-1/4 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] animate-pulse"></div>
+        <!-- ===================== HERO ===================== -->
+        <section id="hero" class="min-h-screen flex flex-col justify-center px-6 md:px-20 relative overflow-hidden">
+            <canvas id="hero-canvas"></canvas>
 
-            <div class="z-10 mt-20">
-                <p class="hero-subtitle text-accent mb-4 tracking-widest uppercase text-sm font-medium">Portfolio 2026</p>
-                <h1 class="hero-title text-6xl md:text-9xl font-bold leading-[0.9] tracking-tighter mb-6">
-                    <span class="block overflow-hidden"><span class="block reveal-text">ERWIN</span></span>
-                    <span class="block overflow-hidden"><span class="block reveal-text ml-10 md:ml-32 text-outline">HE</span></span>
+            <div class="orb w-[700px] h-[700px] bg-accent/5  top-1/4  -right-52"></div>
+            <div class="orb w-[350px] h-[350px] bg-blue-600/5 bottom-1/3 -left-24"></div>
+
+            <div class="relative z-10 mt-16">
+
+                <div class="hero-pre flex items-center gap-3 mb-8" style="opacity:0">
+                    <div class="w-6 h-px bg-accent"></div>
+                    <span class="font-mono text-accent text-xs tracking-widest uppercase">Portfolio 2026</span>
+                </div>
+
+                <h1 class="font-bold leading-[0.85] tracking-tighter mb-10"
+                    style="font-size: clamp(4rem, 13vw, 11rem)">
+                    <span class="line-wrap">
+                        <span class="hero-line glitch" data-text="ERWIN" style="opacity:0">ERWIN</span>
+                    </span>
+                    <span class="line-wrap">
+                        <span class="hero-line text-outline glitch" data-text="HE" style="opacity:0;margin-left:clamp(2rem,10vw,10rem)">HE</span>
+                    </span>
                 </h1>
-                <div class="hero-desc overflow-hidden max-w-2xl">
-                    <p class="text-xl md:text-2xl text-gray-400 font-light reveal-text-delay">
-                        {{ profile.role }} based in <span class="text-white">{{ profile.location }}</span>. 
-                        Building high-concurrency distributed systems & financial models.
+
+                <div class="hero-desc max-w-2xl" style="opacity:0">
+                    <p class="text-xl md:text-2xl text-gray-400 font-light">
+                        <span ref="typer"></span><span class="type-cursor"></span>
                     </p>
+                    <p class="text-gray-600 text-sm mt-3">
+                        Based in <span class="text-gray-300">{{ profile.location }}</span>
+                    </p>
+                </div>
+
+                <div class="hero-cta flex flex-wrap items-center gap-6 mt-10" style="opacity:0">
+                    <button @click="goTo('experience')"
+                            class="hover-magnet px-6 py-3 bg-accent text-black font-semibold text-xs tracking-widest hover:bg-white transition-colors duration-300">
+                        VIEW WORK
+                    </button>
+                    <a :href="'mailto:' + profile.contact.email"
+                       class="hover-magnet text-sm tracking-widest border-b border-white/20 pb-1 hover:border-accent hover:text-accent transition-all duration-300">
+                        GET IN TOUCH →
+                    </a>
                 </div>
             </div>
 
-            <div class="absolute bottom-10 right-10 animate-bounce">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F0F0F0" stroke-width="2">
-                    <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
-                </svg>
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-700 hero-scroll" style="opacity:0">
+                <span class="font-mono text-xs tracking-widest uppercase">Scroll</span>
+                <div class="w-px h-10 bg-gradient-to-b from-gray-600 to-transparent animate-pulse"></div>
             </div>
         </section>
 
-        <section class="py-24 px-6 md:px-20 bg-bg relative">
-            <h2 class="section-title text-xs font-bold text-gray-500 uppercase tracking-widest mb-12">01 / About</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-auto md:h-[500px]">
-                <div class="col-span-1 md:col-span-2 row-span-2 border border-glassBorder bg-glass backdrop-blur-md p-10 rounded-sm flex flex-col justify-between group hover:border-accent/30 transition-colors duration-500">
-                    <div class="text-3xl font-light leading-snug">
-                        <span class="text-accent">{{ profile.education[0].school }}</span> Master's Candidate. 
-                        Bridging the gap between <span class="text-white font-normal">Complex Financial Economics</span> and <span class="text-white font-normal">Advanced Software Engineering</span>.
-                    </div>
-                    <div class="mt-8">
-                        <p class="text-gray-400 text-sm">Focus Areas</p>
-                        <div class="flex flex-wrap gap-2 mt-2">
-                            <span v-for="focus in profile.focusAreas" :key="focus" class="px-3 py-1 border border-white/10 rounded-full text-xs hover:bg-accent hover:text-black transition-colors">{{ focus }}</span>
+        <!-- ===================== STATS STRIP ===================== -->
+        <section class="border-y border-white/[0.05] bg-white/[0.015]">
+            <div class="flex flex-wrap">
+                <div v-for="s in stats" :key="s.label"
+                     class="stat-item flex-1 min-w-[130px] px-8 py-10">
+                    <div class="font-mono text-3xl font-bold text-accent stat-num"
+                         :data-target="s.value" :data-suffix="s.suffix">0</div>
+                    <div class="text-xs text-gray-600 uppercase tracking-widest mt-1">{{ s.label }}</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== ABOUT ===================== -->
+        <section id="about" class="py-28 px-6 md:px-20">
+
+            <div class="flex items-center gap-4 mb-16 reveal">
+                <span class="font-mono text-xs text-gray-700">01</span>
+                <div class="w-6 h-px bg-gray-800"></div>
+                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest">About</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+                <div class="lg:col-span-3 border border-white/[0.06] bg-white/[0.018] p-8 md:p-12 reveal">
+                    <p class="text-2xl md:text-3xl font-light leading-relaxed text-gray-300 mb-10">
+                        Master's candidate at
+                        <span class="text-white font-semibold"> Columbia University</span>
+                        bridging the gap between
+                        <span class="text-accent"> financial economics</span> and
+                        <span class="text-white font-semibold"> distributed systems engineering</span>.
+                    </p>
+                    <div>
+                        <p class="text-xs text-gray-600 uppercase tracking-widest mb-3">Focus Areas</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span v-for="f in profile.focusAreas" :key="f"
+                                  class="px-3 py-1 text-xs border border-white/[0.08] text-gray-400 hover:border-accent/40 hover:text-accent transition-all duration-300 cursor-default">
+                                {{ f }}
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-span-1 border border-glassBorder bg-glass backdrop-blur-md p-8 rounded-sm flex flex-col justify-center items-center group hover:bg-accent hover:text-black transition-all duration-300">
-                    <span class="text-5xl font-bold">{{ profile.education[0].gpa }}</span>
-                    <span class="text-sm uppercase tracking-widest mt-2 opacity-60">GPA (Columbia)</span>
-                </div>
-
-                <div class="col-span-1 border border-glassBorder bg-glass backdrop-blur-md p-8 rounded-sm flex flex-col justify-center items-center text-center">
-                    <p class="text-sm text-gray-400 mb-2">Undergraduate Honors</p>
-                    <p class="font-bold text-white">Ranked 3/80</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ profile.education[1].school }}</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="py-24 px-6 md:px-20 relative">
-            <h2 class="section-title text-xs font-bold text-gray-500 uppercase tracking-widest mb-16">02 / Experience</h2>
-
-            <div class="relative border-l border-white/10 ml-4 md:ml-0 space-y-16">
-                <div v-for="(job, index) in profile.experience" :key="index" 
-                     class="experience-item relative pl-8 md:pl-12 group cursor-none"
-                     @mouseenter="hoverExperience(index)" @mouseleave="resetExperience()">
-                    
-                    <span class="absolute -left-[5px] top-2 w-[9px] h-[9px] bg-accent rounded-full transition-all duration-300 group-hover:scale-150 group-hover:shadow-[0_0_10px_#CCFF00]"></span>
-
-                    <div class="flex flex-col md:flex-row md:items-baseline justify-between mb-2">
-                        <h3 class="text-2xl md:text-4xl font-bold group-hover:text-accent transition-colors">{{ job.role }}</h3>
-                        <span class="text-sm font-mono text-gray-500">{{ job.date }}</span>
-                    </div>
-                    <p class="text-lg text-white/80 mb-4 font-light">{{ job.company }}</p>
-                    <p class="text-gray-400 max-w-2xl leading-relaxed text-sm">{{ job.description }}</p>
-                    
-                    <div class="flex flex-wrap gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-                        <span v-for="tag in job.tech" :key="tag" class="text-xs text-accent border border-accent/20 px-2 py-1 rounded-sm">{{ tag }}</span>
+                <div class="lg:col-span-2 flex flex-col gap-4">
+                    <div v-for="edu in profile.education" :key="edu.school"
+                         class="flex-1 border border-white/[0.06] bg-white/[0.018] p-6 md:p-8 reveal group hover:border-accent/20 transition-colors duration-300">
+                        <p class="font-mono text-xs text-gray-600 mb-3">{{ edu.date }}</p>
+                        <h3 class="font-semibold text-white mb-1 group-hover:text-accent transition-colors duration-300">{{ edu.school }}</h3>
+                        <p class="text-sm text-gray-400 mb-3">{{ edu.degree }}</p>
+                        <p v-if="edu.gpa"    class="font-mono text-xs text-accent">GPA {{ edu.gpa }}</p>
+                        <p v-if="edu.honors" class="font-mono text-xs text-accent">{{ edu.honors }}</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="py-32 overflow-hidden bg-bg relative">
-            <div class="absolute inset-0 bg-gradient-to-r from-bg via-transparent to-bg z-10 pointer-events-none"></div>
-            
-            <div class="marquee-container flex whitespace-nowrap">
-                <div class="marquee-content flex gap-8 items-center" ref="marquee1">
-                    <span v-for="skill in profile.skills" :key="skill" class="text-6xl md:text-8xl font-bold text-outline opacity-30 hover:opacity-100 hover:text-accent hover:text-opacity-100 transition-all duration-300 px-4">
-                        {{ skill }}
-                    </span>
-                </div>
-                <div class="marquee-content flex gap-8 items-center" ref="marquee2">
-                    <span v-for="skill in profile.skills" :key="skill + '-dup'" class="text-6xl md:text-8xl font-bold text-outline opacity-30 hover:opacity-100 hover:text-accent hover:text-opacity-100 transition-all duration-300 px-4">
-                        {{ skill }}
-                    </span>
+        <!-- ===================== EXPERIENCE ===================== -->
+        <section id="experience" class="py-28 px-6 md:px-20">
+
+            <div class="flex items-center gap-4 mb-16 reveal">
+                <span class="font-mono text-xs text-gray-700">02</span>
+                <div class="w-6 h-px bg-gray-800"></div>
+                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Experience</h2>
+            </div>
+
+            <!-- Impact cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-20">
+                <div v-for="proj in featuredProjects" :key="proj.title"
+                     class="project-card p-7 reveal hover-magnet" style="cursor:none">
+                    <div class="project-metric mb-4">{{ proj.metric }}</div>
+                    <h3 class="font-semibold text-white mb-2">{{ proj.title }}</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed mb-5">{{ proj.desc }}</p>
+                    <div class="flex flex-wrap gap-x-3 gap-y-1">
+                        <span v-for="t in proj.tech" :key="t" class="font-mono text-xs text-accent/50">{{ t }}</span>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <section class="min-h-[60vh] flex flex-col justify-between px-6 md:px-20 py-20 bg-white/5 relative">
+            <!-- Timeline rows -->
             <div>
-                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-8">03 / Contact</h2>
-                <a :href="'mailto:' + profile.contact.email" 
-                   class="block text-5xl md:text-8xl font-bold tracking-tighter hover:text-accent transition-colors hover-magnet break-all">
-                    LET'S TALK
+                <div v-for="(job, i) in profile.experience" :key="i"
+                     class="experience-row group py-9 reveal"
+                     @mouseenter="dimOthers(i)" @mouseleave="undim()">
+                    <div class="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">
+                        <div>
+                            <span class="font-mono text-xs text-gray-600">{{ job.date }}</span>
+                            <p class="text-sm text-gray-500 mt-1">{{ job.company }}</p>
+                        </div>
+                        <div class="flex gap-5">
+                            <div class="timeline-dot mt-2"></div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-semibold mb-2 group-hover:text-accent transition-colors duration-300">{{ job.role }}</h3>
+                                <p class="text-sm text-gray-400 leading-relaxed mb-4 max-w-2xl">{{ job.description }}</p>
+                                <div class="flex flex-wrap gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <span v-for="t in job.tech" :key="t"
+                                          class="font-mono text-xs text-accent border border-accent/15 px-2 py-0.5">{{ t }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== SKILLS ===================== -->
+        <section id="skills" class="py-28 bg-white/[0.015]">
+
+            <div class="px-6 md:px-20">
+                <div class="flex items-center gap-4 mb-16 reveal">
+                    <span class="font-mono text-xs text-gray-700">03</span>
+                    <div class="w-6 h-px bg-gray-800"></div>
+                    <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Skills</h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 reveal">
+                    <div v-for="cat in skillCategories" :key="cat.name" class="space-y-5">
+                        <h3 class="font-mono text-xs text-gray-600 uppercase tracking-widest border-b border-white/[0.06] pb-3">{{ cat.name }}</h3>
+                        <div v-for="sk in cat.skills" :key="sk.name" class="space-y-1.5">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-300">{{ sk.name }}</span>
+                                <span class="font-mono text-xs text-accent">{{ sk.level }}%</span>
+                            </div>
+                            <div class="skill-track">
+                                <div class="skill-fill" :data-width="sk.level + '%'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scrolling marquee -->
+            <div class="mt-24 py-10 border-t border-b border-white/[0.04] reveal">
+                <div class="marquee-outer">
+                    <div class="marquee-inner">
+                        <span v-for="(sk, i) in [...profile.skills, ...profile.skills]" :key="'mq-' + i"
+                              class="text-5xl md:text-7xl font-bold text-outline opacity-20 hover:opacity-70 transition-all duration-300 px-4 cursor-default select-none"
+                              style="transition: opacity 0.3s, color 0.3s, -webkit-text-stroke-color 0.3s"
+                              @mouseenter="e => { e.target.style.color='#CCFF00'; e.target.style.webkitTextStrokeColor='transparent'; e.target.style.opacity='0.8'; }"
+                              @mouseleave="e => { e.target.style.color='transparent'; e.target.style.webkitTextStrokeColor='rgba(240,240,240,0.18)'; e.target.style.opacity='0.2'; }">
+                            {{ sk }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== CONTACT ===================== -->
+        <section id="contact" class="min-h-[75vh] flex flex-col justify-between px-6 md:px-20 py-28">
+
+            <div class="reveal">
+                <div class="flex items-center gap-4 mb-16">
+                    <span class="font-mono text-xs text-gray-700">04</span>
+                    <div class="w-6 h-px bg-gray-800"></div>
+                    <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Contact</h2>
+                </div>
+
+                <a :href="'mailto:' + profile.contact.email" class="block hover-magnet group">
+                    <p class="font-mono text-xs text-gray-600 uppercase tracking-widest mb-6">Drop me a line</p>
+                    <div class="font-bold tracking-tighter leading-[0.9] group-hover:text-accent transition-colors duration-300"
+                         style="font-size: clamp(3rem, 10vw, 8rem)">
+                        <span class="block">LET'S</span>
+                        <span class="block text-outline" style="transition: -webkit-text-stroke-color 0.3s"
+                              @mouseenter="e => e.target.style.webkitTextStrokeColor = 'rgba(204,255,0,0.25)'"
+                              @mouseleave="e => e.target.style.webkitTextStrokeColor = 'rgba(240,240,240,0.18)'">
+                            CONNECT.
+                        </span>
+                    </div>
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mt-20 border-t border-white/10 pt-10">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/[0.05] pt-12 mt-16 reveal">
                 <div>
-                    <h4 class="text-gray-500 text-xs uppercase mb-4">Socials</h4>
+                    <p class="font-mono text-xs text-gray-600 uppercase tracking-widest mb-4">Location</p>
+                    <p class="text-sm text-gray-300">{{ profile.location }}</p>
+                </div>
+                <div>
+                    <p class="font-mono text-xs text-gray-600 uppercase tracking-widest mb-4">Email</p>
+                    <a :href="'mailto:' + profile.contact.email"
+                       class="text-sm text-gray-300 hover:text-accent transition-colors">{{ profile.contact.email }}</a>
+                </div>
+                <div>
+                    <p class="font-mono text-xs text-gray-600 uppercase tracking-widest mb-4">Phone</p>
+                    <p class="text-sm text-gray-300">{{ profile.contact.phone }}</p>
+                </div>
+                <div>
+                    <p class="font-mono text-xs text-gray-600 uppercase tracking-widest mb-4">Socials</p>
                     <div class="flex flex-col gap-2">
-                        <a :href="'https://' + profile.contact.linkedin" target="_blank" class="hover:text-accent transition-colors hover-magnet w-fit">LinkedIn</a>
-                        <a :href="'https://' + profile.contact.github" target="_blank" class="hover:text-accent transition-colors hover-magnet w-fit">GitHub</a>
+                        <a :href="'https://' + profile.contact.linkedin" target="_blank"
+                           class="hover-magnet w-fit text-sm text-gray-300 hover:text-accent transition-colors">LinkedIn ↗</a>
+                        <a :href="'https://' + profile.contact.github" target="_blank"
+                           class="hover-magnet w-fit text-sm text-gray-300 hover:text-accent transition-colors">GitHub ↗</a>
                     </div>
-                </div>
-                <div>
-                    <h4 class="text-gray-500 text-xs uppercase mb-4">Contact</h4>
-                    <p>{{ profile.contact.phone }}</p>
-                    <p>{{ profile.contact.email }}</p>
-                </div>
-                <div>
-                    <h4 class="text-gray-500 text-xs uppercase mb-4">Location</h4>
-                    <p>{{ profile.location }}</p>
                 </div>
             </div>
         </section>
-        
-        <footer class="px-6 md:px-20 py-6 text-xs text-gray-600 flex justify-between">
+
+        <footer class="px-6 md:px-20 py-6 border-t border-white/[0.04] flex justify-between items-center text-xs text-gray-700">
             <span>© 2026 Erwin He. All Rights Reserved.</span>
-            <span>Design by Gemini 3 Pro</span>
+            <span class="font-mono">Built with precision</span>
         </footer>
 
-    </div>
+    </div><!-- /#app -->
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
     <script>
-        const { createApp, ref, onMounted } = Vue;
-
-        // ==========================================
-        // CONFIGURATION: Resume Data Mapped Here
-        // ==========================================
-        const profileData = {
-            name: "Erwin He",
-            role: "Full Stack Engineer & Data Analyst",
-            location: "New York, NY",
-            focusAreas: [ "Machine Learning", "Advanced Algorithms", "FinTech", "Data Mining/Engineering"],
-            education: [
-                {
-                    school: "Columbia University",
-                    degree: "MS in CS / Applied Analytics",
-                    date: "Sep 2025 - Dec 2026",
-                    gpa: "90/100", // 
-                },
-                {
-                    school: "South China Normal University",
-                    degree: "BE in Finance",
-                    date: "Sep 2021 - Jul 2025",
-                    honors: "Ranked 3/80", // [cite: 9]
-                }
-            ],
-            experience: [
-                {
-                    role: "Technical Engineer / Co-Founder",
-                    company: "Multi-Platform Restaurant System",
-                    date: "Oct 2024 - Jul 2025",
-                    description: "Architected a restaurant management platform integrating Meituan & POS systems. Engineered API gateway with FastAPI (5+ integrations) and reduced latency by 60% using Redis caching.", // [cite: 17-21]
-                    tech: ["FastAPI", "PostgreSQL", "Redis", "Python"]
-                },
-                {
-                    role: "Actuarial Modeler Intern",
-                    company: "Allianz Life Insurance Co.",
-                    date: "Jul 2024 - Sep 2024",
-                    description: "Developed GLM/XGBoost pricing models supporting $37.5M product lines. Used Apache Kafka for stream processing to improve prediction accuracy by 15%.", // [cite: 22-24]
-                    tech: ["Python", "Apache Kafka", "Docker", "XGBoost"]
-                },
-                {
-                    role: "Risk Assessment Intern",
-                    company: "Shanghai Pudong Development Bank",
-                    date: "Jul 2023 - Sep 2023",
-                    description: "Built RESTful APIs with Spring Boot. Modeled credit loss distribution using Monte Carlo simulation for a $130M portfolio.", // [cite: 28-33]
-                    tech: ["Spring Boot", "SQL", "Monte Carlo", "Redis"]
-                },
-                {
-                    role: "Data Analyst Intern",
-                    company: "China International Capital Corporation",
-                    date: "Jul 2022 - Sep 2022",
-                    description: "modeled financial risk for 50 HNW clients. Optimized automation procedures reducing processing time by 35%.", // [cite: 34-37]
-                    tech: ["MySQL", "VBA", "Financial Modeling"]
-                }
-            ],
-            skills: [
-                "Python", "Java", "Spring Boot", "React", "Node.js", "PostgreSQL", "MongoDB", 
-                "AWS", "Docker", "Kubernetes", "Kafka", "Redis", "Elasticsearch", "Machine Learning"
-            ], // 
-            contact: {
-                email: "gh2722@columbia.edu", // [cite: 3]
-                phone: "(917) 460-6778", // [cite: 3]
-                linkedin: "linkedin.com/in/erwingt/", // [cite: 3]
-                github: "github.com/ErwinHe7" // [cite: 3]
+    /* =====================================================
+       PRELOADER — animated percentage counter
+    ===================================================== */
+    (function () {
+        const fill = document.getElementById('preloader-fill');
+        const pct  = document.getElementById('preloader-pct');
+        const pre  = document.getElementById('preloader');
+        let v = 0;
+        const iv = setInterval(() => {
+            v = Math.min(v + Math.random() * 7 + 2, 100);
+            fill.style.width = v + '%';
+            pct.textContent  = Math.round(v) + '%';
+            if (v >= 100) {
+                clearInterval(iv);
+                setTimeout(() => pre.classList.add('done'), 250);
             }
-        };
+        }, 38);
+    })();
 
-        createApp({
-            setup() {
-                const profile = ref(profileData);
-                const cursorDot = ref(null);
-                const cursorOutline = ref(null);
-                const marquee1 = ref(null);
-                const marquee2 = ref(null);
+    /* =====================================================
+       SCROLL PROGRESS BAR
+    ===================================================== */
+    window.addEventListener('scroll', () => {
+        const p = window.scrollY / (document.documentElement.scrollHeight - innerHeight);
+        document.getElementById('scroll-progress').style.width = (p * 100) + '%';
+    }, { passive: true });
 
-                // Experience hover effect logic
-                const hoverExperience = (index) => {
-                    gsap.to('.experience-item', { opacity: 0.3, duration: 0.3 });
-                    gsap.to(`.experience-item:nth-child(${index + 1})`, { opacity: 1, duration: 0.3 });
-                };
+    /* =====================================================
+       CANVAS — particle network in hero
+    ===================================================== */
+    function initCanvas() {
+        const canvas = document.getElementById('hero-canvas');
+        const ctx    = canvas.getContext('2d');
+        let mx = -999, my = -999;
 
-                const resetExperience = () => {
-                    gsap.to('.experience-item', { opacity: 1, duration: 0.3 });
-                };
+        function resize() {
+            canvas.width  = innerWidth;
+            canvas.height = innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
 
-                onMounted(() => {
-                    gsap.registerPlugin(ScrollTrigger);
+        const pts = Array.from({ length: 55 }, () => ({
+            x:  Math.random() * innerWidth,
+            y:  Math.random() * innerHeight,
+            vx: (Math.random() - 0.5) * 0.35,
+            vy: (Math.random() - 0.5) * 0.35,
+            r:  Math.random() * 1.2 + 0.4,
+            a:  Math.random() * 0.4 + 0.1,
+        }));
 
-                    // 1. Custom Cursor Logic
-                    window.addEventListener("mousemove", (e) => {
-                        const posX = e.clientX;
-                        const posY = e.clientY;
+        (function tick() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                        // Dot follows instantly
-                        cursorDot.value.style.left = `${posX}px`;
-                        cursorDot.value.style.top = `${posY}px`;
+            pts.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width)  p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height)  p.vy *= -1;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(204,255,0,${p.a})`;
+                ctx.fill();
+            });
 
-                        // Outline follows with delay (GSAP)
-                        gsap.to(cursorOutline.value, {
-                            x: posX,
-                            y: posY,
-                            duration: 0.15,
-                            ease: "power2.out"
-                        });
+            for (let i = 0; i < pts.length; i++) {
+                for (let j = i + 1; j < pts.length; j++) {
+                    const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+                    if (d < 130) {
+                        ctx.beginPath();
+                        ctx.moveTo(pts[i].x, pts[i].y);
+                        ctx.lineTo(pts[j].x, pts[j].y);
+                        ctx.strokeStyle = `rgba(204,255,0,${0.12 * (1 - d / 130)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+                const dm = Math.hypot(pts[i].x - mx, pts[i].y - my);
+                if (dm < 180) {
+                    ctx.beginPath();
+                    ctx.moveTo(pts[i].x, pts[i].y);
+                    ctx.lineTo(mx, my);
+                    ctx.strokeStyle = `rgba(204,255,0,${0.18 * (1 - dm / 180)})`;
+                    ctx.lineWidth = 0.7;
+                    ctx.stroke();
+                }
+            }
+
+            requestAnimationFrame(tick);
+        })();
+    }
+
+    /* =====================================================
+       HELPERS
+    ===================================================== */
+    function typeText(el, text, speed) {
+        let i = 0;
+        el.textContent = '';
+        const iv = setInterval(() => {
+            if (i < text.length) el.textContent += text[i++];
+            else clearInterval(iv);
+        }, speed);
+    }
+
+    function countUp(el) {
+        const target = +el.dataset.target;
+        const suffix = el.dataset.suffix || '';
+        let cur = 0;
+        const step = target / 60;
+        const iv = setInterval(() => {
+            cur = Math.min(cur + step, target);
+            el.textContent = Math.round(cur) + suffix;
+            if (cur >= target) clearInterval(iv);
+        }, 30);
+    }
+
+    /* =====================================================
+       VUE APPLICATION
+    ===================================================== */
+    const { createApp, ref, onMounted } = Vue;
+
+    const profileData = {
+        name:       "Erwin He",
+        role:       "Full Stack Engineer & Data Analyst",
+        location:   "New York, NY",
+        focusAreas: ["Machine Learning", "Advanced Algorithms", "FinTech", "Data Mining / Engineering"],
+        education: [
+            {
+                school: "Columbia University",
+                degree: "MS in CS / Applied Analytics",
+                date:   "Sep 2025 – Dec 2026",
+                gpa:    "90 / 100",
+            },
+            {
+                school:  "South China Normal University",
+                degree:  "BE in Finance",
+                date:    "Sep 2021 – Jul 2025",
+                honors:  "Ranked 3 / 80",
+            }
+        ],
+        experience: [
+            {
+                role:        "Technical Engineer / Co-Founder",
+                company:     "Multi-Platform Restaurant System",
+                date:        "Oct 2024 – Jul 2025",
+                description: "Architected a restaurant management platform integrating Meituan & POS systems. Engineered an API gateway with FastAPI (5+ integrations) and cut latency by 60% via Redis caching.",
+                tech:        ["FastAPI", "PostgreSQL", "Redis", "Python", "Docker"]
+            },
+            {
+                role:        "Actuarial Modeler Intern",
+                company:     "Allianz Life Insurance Co.",
+                date:        "Jul 2024 – Sep 2024",
+                description: "Developed GLM / XGBoost pricing models supporting $37.5 M product lines. Leveraged Apache Kafka stream processing to improve prediction accuracy by 15%.",
+                tech:        ["Python", "XGBoost", "Apache Kafka", "Docker"]
+            },
+            {
+                role:        "Risk Assessment Intern",
+                company:     "Shanghai Pudong Development Bank",
+                date:        "Jul 2023 – Sep 2023",
+                description: "Built RESTful APIs with Spring Boot. Modeled credit loss distribution using Monte Carlo simulation across a $130 M portfolio.",
+                tech:        ["Spring Boot", "SQL", "Monte Carlo", "Redis"]
+            },
+            {
+                role:        "Data Analyst Intern",
+                company:     "China International Capital Corporation",
+                date:        "Jul 2022 – Sep 2022",
+                description: "Modeled financial risk for 50 HNW clients. Automated reporting pipelines, cutting processing time by 35%.",
+                tech:        ["MySQL", "VBA", "Financial Modeling", "Python"]
+            }
+        ],
+        skills: [
+            "Python", "Java", "Spring Boot", "React", "Node.js",
+            "PostgreSQL", "MongoDB", "AWS", "Docker", "Kubernetes",
+            "Kafka", "Redis", "XGBoost", "FastAPI"
+        ],
+        contact: {
+            email:    "gh2722@columbia.edu",
+            phone:    "(917) 460-6778",
+            linkedin: "linkedin.com/in/erwingt/",
+            github:   "github.com/ErwinHe7",
+        }
+    };
+
+    createApp({
+        setup() {
+            const profile       = ref(profileData);
+            const cursorDot     = ref(null);
+            const cursorOutline = ref(null);
+            const typer         = ref(null);
+            const navEl         = ref(null);
+            const active        = ref('');
+
+            const stats = [
+                { label: 'Years Building',   value: 4,   suffix: '+'  },
+                { label: 'Internships',       value: 3,   suffix: ''   },
+                { label: 'Latency Reduced',   value: 60,  suffix: '%'  },
+                { label: 'Portfolio Managed', value: 130, suffix: 'M+' },
+            ];
+
+            const featuredProjects = [
+                {
+                    metric: '60%',
+                    title:  'Restaurant Platform',
+                    desc:   'Latency reduction via Redis caching across a multi-platform Meituan & POS integration.',
+                    tech:   ['FastAPI', 'Redis', 'PostgreSQL'],
+                },
+                {
+                    metric: '$37.5M',
+                    title:  'Actuarial Pricing Model',
+                    desc:   'Product lines supported by GLM/XGBoost models; +15% prediction accuracy via Kafka streaming.',
+                    tech:   ['XGBoost', 'Kafka', 'Docker'],
+                },
+                {
+                    metric: '$130M',
+                    title:  'Credit Risk Engine',
+                    desc:   'Portfolio credit-loss distribution modeled with Monte Carlo simulation.',
+                    tech:   ['Spring Boot', 'SQL', 'Monte Carlo'],
+                },
+            ];
+
+            const skillCategories = [
+                {
+                    name: 'Languages',
+                    skills: [
+                        { name: 'Python',     level: 95 },
+                        { name: 'Java',       level: 85 },
+                        { name: 'SQL',        level: 90 },
+                        { name: 'JavaScript', level: 75 },
+                    ]
+                },
+                {
+                    name: 'Frameworks',
+                    skills: [
+                        { name: 'FastAPI',     level: 90 },
+                        { name: 'Spring Boot', level: 82 },
+                        { name: 'React/Node',  level: 74 },
+                        { name: 'Vue.js',      level: 70 },
+                    ]
+                },
+                {
+                    name: 'Data & ML',
+                    skills: [
+                        { name: 'XGBoost / GLM',     level: 88 },
+                        { name: 'Apache Kafka',       level: 80 },
+                        { name: 'Machine Learning',   level: 85 },
+                        { name: 'Financial Modeling', level: 92 },
+                    ]
+                },
+                {
+                    name: 'Infrastructure',
+                    skills: [
+                        { name: 'Docker / K8s',    level: 80 },
+                        { name: 'Redis',           level: 85 },
+                        { name: 'PostgreSQL/Mongo',level: 88 },
+                        { name: 'AWS',             level: 75 },
+                    ]
+                },
+            ];
+
+            const goTo = (id) => {
+                document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            const dimOthers = (idx) => {
+                gsap.to('.experience-row', { opacity: 0.35, duration: 0.25 });
+                gsap.to(`.experience-row:nth-child(${idx + 1})`, { opacity: 1, duration: 0.25 });
+            };
+            const undim = () => gsap.to('.experience-row', { opacity: 1, duration: 0.25 });
+
+            onMounted(() => {
+                gsap.registerPlugin(ScrollTrigger);
+                initCanvas();
+
+                /* Custom cursor */
+                window.addEventListener('mousemove', e => {
+                    cursorDot.value.style.left = e.clientX + 'px';
+                    cursorDot.value.style.top  = e.clientY + 'px';
+                    gsap.to(cursorOutline.value, {
+                        x: e.clientX, y: e.clientY,
+                        duration: 0.14, ease: 'power2.out'
                     });
+                }, { passive: true });
 
-                    // Magnetic Hover Effect
-                    const magneticElements = document.querySelectorAll('.hover-magnet');
-                    magneticElements.forEach(el => {
-                        el.addEventListener('mouseenter', () => {
-                            gsap.to(cursorOutline.value, { scale: 1.5, borderColor: "transparent", backgroundColor: "rgba(204, 255, 0, 0.2)" });
-                            gsap.to(cursorDot.value, { scale: 0.5 });
-                        });
-                        el.addEventListener('mouseleave', () => {
-                            gsap.to(cursorOutline.value, { scale: 1, borderColor: "rgba(255,255,255,0.5)", backgroundColor: "transparent" });
-                            gsap.to(cursorDot.value, { scale: 1 });
-                        });
-                    });
-
-                    // 2. Hero Animations
-                    const tl = gsap.timeline();
-                    tl.from(".hero-subtitle", { y: 20, opacity: 0, duration: 0.8, delay: 0.2 })
-                      .from(".reveal-text", { 
-                          y: 150, 
-                          stagger: 0.1, 
-                          duration: 1, 
-                          ease: "power4.out" 
-                      }, "-=0.5")
-                      .from(".reveal-text-delay", { opacity: 0, y: 20, duration: 1 }, "-=0.5");
-
-                    // 3. Section Scroll Triggers
-                    gsap.utils.toArray('.section-title').forEach(title => {
-                        gsap.from(title, {
-                            scrollTrigger: {
-                                trigger: title,
-                                start: "top 90%",
-                            },
-                            opacity: 0,
-                            x: -20,
-                            duration: 1
-                        });
-                    });
-
-                    gsap.from(".experience-item", {
-                        scrollTrigger: {
-                            trigger: ".experience-item",
-                            start: "top 80%",
-                        },
-                        opacity: 0,
-                        y: 50,
-                        stagger: 0.2,
-                        duration: 0.8
-                    });
-
-                    // 4. Marquee Animation
-                    const speed = 50; // pixels per second
-                    const contentWidth = marquee1.value.offsetWidth;
-                    
-                    gsap.to(".marquee-content", {
-                        x: `-${contentWidth + 32}px`, // + gap
-                        duration: 20,
-                        ease: "none",
-                        repeat: -1
-                    });
+                document.querySelectorAll('.hover-magnet').forEach(el => {
+                    el.addEventListener('mouseenter', () => cursorOutline.value?.classList.add('big'));
+                    el.addEventListener('mouseleave', () => cursorOutline.value?.classList.remove('big'));
                 });
 
-                return {
-                    profile,
-                    cursorDot,
-                    cursorOutline,
-                    marquee1,
-                    marquee2,
-                    hoverExperience,
-                    resetExperience
-                };
-            }
-        }).mount('#app');
+                /* Nav scroll */
+                const sectionIds = ['hero', 'about', 'experience', 'skills', 'contact'];
+                window.addEventListener('scroll', () => {
+                    navEl.value?.classList.toggle('scrolled', scrollY > 60);
+                    sectionIds.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+                        const { top, bottom } = el.getBoundingClientRect();
+                        if (top <= 120 && bottom > 120) active.value = id;
+                    });
+                }, { passive: true });
+
+                /* Hero entrance (delay so preloader finishes first) */
+                const tl = gsap.timeline({ delay: 1.7 });
+                tl.to('.hero-pre',    { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' })
+                  .to('.hero-line',   { opacity: 1, y: 0, stagger: 0.09, duration: 1.1, ease: 'power4.out' }, '-=0.3')
+                  .to('.hero-desc',   { opacity: 1, y: 0, duration: 0.8 }, '-=0.5')
+                  .to('.hero-cta',    { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
+                  .to('.hero-scroll', { opacity: 1, duration: 0.5 }, '-=0.2')
+                  .call(() => typeText(typer.value, profileData.role, 52));
+
+                /* Scroll reveals */
+                document.querySelectorAll('.reveal').forEach((el, i) => {
+                    gsap.fromTo(el,
+                        { opacity: 0, y: 38 },
+                        {
+                            opacity: 1, y: 0,
+                            duration: 0.85, ease: 'power3.out',
+                            delay: (i % 4) * 0.07,
+                            scrollTrigger: {
+                                trigger: el,
+                                start:   'top 89%',
+                                toggleActions: 'play none none none',
+                            }
+                        }
+                    );
+                });
+
+                /* Count-up stats */
+                const io = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                        if (e.isIntersecting) { countUp(e.target); io.unobserve(e.target); }
+                    });
+                }, { threshold: 0.6 });
+                document.querySelectorAll('.stat-num').forEach(el => io.observe(el));
+
+                /* Skill bar animations */
+                const sio = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                        if (e.isIntersecting) {
+                            e.target.style.width = e.target.dataset.width;
+                            sio.unobserve(e.target);
+                        }
+                    });
+                }, { threshold: 0.4 });
+                document.querySelectorAll('.skill-fill').forEach(el => sio.observe(el));
+            });
+
+            return {
+                profile, cursorDot, cursorOutline, typer,
+                navEl, active, stats, featuredProjects, skillCategories,
+                goTo, dimOthers, undim,
+            };
+        }
+    }).mount('#app');
     </script>
 </body>
-
 </html>
