@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erwin He | Full Stack Engineer & Data Analyst</title>
+    <title>Guantao (Erwin) He | Software Engineer & AI Engineer</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -368,6 +368,7 @@
                 <div class="hero-pre flex items-center gap-3 mb-8" style="opacity:0">
                     <div class="w-6 h-px bg-accent"></div>
                     <span class="font-mono text-accent text-xs tracking-widest uppercase">Portfolio 2026</span>
+                    <span class="font-mono text-gray-600 text-xs tracking-widest uppercase">/ Guantao He</span>
                 </div>
 
                 <h1 class="font-bold leading-[0.85] tracking-tighter mb-10"
@@ -434,9 +435,9 @@
                     <p class="text-2xl md:text-3xl font-light leading-relaxed text-gray-300 mb-10">
                         Master's candidate at
                         <span class="text-white font-semibold"> Columbia University</span>
-                        bridging the gap between
-                        <span class="text-accent"> financial economics</span> and
-                        <span class="text-white font-semibold"> distributed systems engineering</span>.
+                        building at the intersection of
+                        <span class="text-accent"> AI / machine learning</span> and
+                        <span class="text-white font-semibold"> scalable distributed systems</span>.
                     </p>
                     <div>
                         <p class="text-xs text-gray-600 uppercase tracking-widest mb-3">Focus Areas</p>
@@ -603,7 +604,7 @@
         </section>
 
         <footer class="px-6 md:px-20 py-6 border-t border-white/[0.04] flex justify-between items-center text-xs text-gray-700">
-            <span>© 2026 Erwin He. All Rights Reserved.</span>
+            <span>© 2026 Guantao (Erwin) He. All Rights Reserved.</span>
             <span class="font-mono">Built with precision</span>
         </footer>
 
@@ -737,10 +738,10 @@
     const { createApp, ref, onMounted } = Vue;
 
     const profileData = {
-        name:       "Erwin He",
-        role:       "Full Stack Engineer & Data Analyst",
+        name:       "Guantao (Erwin) He",
+        role:       "Software Engineer & AI Engineer",
         location:   "New York, NY",
-        focusAreas: ["Machine Learning", "Advanced Algorithms", "FinTech", "Data Mining / Engineering"],
+        focusAreas: ["AI / Machine Learning", "Distributed Systems", "Full-Stack Engineering", "Data Engineering"],
         education: [
             {
                 school: "Columbia University",
@@ -757,32 +758,32 @@
         ],
         experience: [
             {
-                role:        "Technical Engineer / Co-Founder",
-                company:     "Multi-Platform Restaurant System",
+                role:        "Software Engineer & Co-Founder",
+                company:     "Third-Party Platform Integration",
                 date:        "Oct 2024 – Jul 2025",
-                description: "Architected a restaurant management platform integrating Meituan & POS systems. Engineered an API gateway with FastAPI (5+ integrations) and cut latency by 60% via Redis caching.",
+                description: "Architected a multi-tenant service platform with 5+ third-party API integrations. Built an async API gateway in FastAPI, cut p95 latency 60% via Redis caching, and designed the event-driven pipeline for real-time order orchestration.",
                 tech:        ["FastAPI", "PostgreSQL", "Redis", "Python", "Docker"]
             },
             {
                 role:        "Actuarial Modeler Intern",
                 company:     "Allianz Life Insurance Co.",
                 date:        "Jul 2024 – Sep 2024",
-                description: "Developed GLM / XGBoost pricing models supporting $37.5 M product lines. Leveraged Apache Kafka stream processing to improve prediction accuracy by 15%.",
+                description: "Co-developed GLM / XGBoost pricing models covering a $15M product line. Built Apache Kafka stream-processing jobs that lifted prediction accuracy by 15% on a six-figure daily event volume.",
                 tech:        ["Python", "XGBoost", "Apache Kafka", "Docker"]
             },
             {
-                role:        "Risk Assessment Intern",
+                role:        "Software Engineer Intern — Risk Assessment Team",
                 company:     "Shanghai Pudong Development Bank",
                 date:        "Jul 2023 – Sep 2023",
-                description: "Built RESTful APIs with Spring Boot. Modeled credit loss distribution using Monte Carlo simulation across a $130 M portfolio.",
-                tech:        ["Spring Boot", "SQL", "Monte Carlo", "Redis"]
+                description: "Shipped RESTful microservices in Spring Boot backing the internal risk workflow. Modeled credit-loss distribution with Monte Carlo simulation over a $50M portfolio slice and wired results into downstream dashboards.",
+                tech:        ["Spring Boot", "Java", "SQL", "Monte Carlo"]
             },
             {
-                role:        "Data Analyst Intern",
+                role:        "Data Engineering Intern — Wealth Management Team",
                 company:     "China International Capital Corporation",
                 date:        "Jul 2022 – Sep 2022",
-                description: "Modeled financial risk for 50 HNW clients. Automated reporting pipelines, cutting processing time by 35%.",
-                tech:        ["MySQL", "VBA", "Financial Modeling", "Python"]
+                description: "Automated reporting pipelines for 50 HNW client portfolios, cutting processing time by 35%. Built ETL jobs and risk dashboards consumed by the wealth advisory desk.",
+                tech:        ["Python", "SQL", "MySQL", "ETL"]
             }
         ],
         skills: [
@@ -792,7 +793,7 @@
         ],
         contact: {
             email:    "gh2722@columbia.edu",
-            phone:    "(917) 460-6778",
+            phone:    "(929) 839-8730",
             linkedin: "linkedin.com/in/erwingt/",
             github:   "github.com/ErwinHe7",
         }
@@ -808,30 +809,30 @@
             const active        = ref('');
 
             const stats = [
-                { label: 'Years Building',   value: 4,   suffix: '+'  },
-                { label: 'Internships',       value: 3,   suffix: ''   },
-                { label: 'Latency Reduced',   value: 60,  suffix: '%'  },
-                { label: 'Portfolio Managed', value: 130, suffix: 'M+' },
+                { label: 'Years Building',    value: 4,   suffix: '+'  },
+                { label: 'Internships',        value: 3,   suffix: ''   },
+                { label: 'Latency Reduced',    value: 60,  suffix: '%'  },
+                { label: 'Portfolio Modeled',  value: 50,  suffix: 'M+' },
             ];
 
             const featuredProjects = [
                 {
                     metric: '60%',
-                    title:  'Restaurant Platform',
-                    desc:   'Latency reduction via Redis caching across a multi-platform Meituan & POS integration.',
+                    title:  'Async API Gateway',
+                    desc:   'p95 latency reduction via Redis caching across a multi-tenant platform with 5+ third-party integrations.',
                     tech:   ['FastAPI', 'Redis', 'PostgreSQL'],
                 },
                 {
-                    metric: '$37.5M',
+                    metric: '+15%',
                     title:  'Actuarial Pricing Model',
-                    desc:   'Product lines supported by GLM/XGBoost models; +15% prediction accuracy via Kafka streaming.',
+                    desc:   'GLM / XGBoost pricing models for a $15M product line; accuracy lift via Kafka stream processing.',
                     tech:   ['XGBoost', 'Kafka', 'Docker'],
                 },
                 {
-                    metric: '$130M',
+                    metric: '$50M',
                     title:  'Credit Risk Engine',
-                    desc:   'Portfolio credit-loss distribution modeled with Monte Carlo simulation.',
-                    tech:   ['Spring Boot', 'SQL', 'Monte Carlo'],
+                    desc:   'Portfolio credit-loss distribution modeled with Monte Carlo simulation and served via Spring Boot APIs.',
+                    tech:   ['Spring Boot', 'Java', 'Monte Carlo'],
                 },
             ];
 
@@ -855,12 +856,12 @@
                     ]
                 },
                 {
-                    name: 'Data & ML',
+                    name: 'AI & Data',
                     skills: [
-                        { name: 'XGBoost / GLM',     level: 88 },
+                        { name: 'Machine Learning',  level: 88 },
+                        { name: 'XGBoost / GLM',      level: 85 },
                         { name: 'Apache Kafka',       level: 80 },
-                        { name: 'Machine Learning',   level: 85 },
-                        { name: 'Financial Modeling', level: 92 },
+                        { name: 'Data Pipelines',     level: 85 },
                     ]
                 },
                 {
